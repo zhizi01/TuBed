@@ -12,6 +12,9 @@ return [
     'default_app'      => 'index',
     // 默认时区
     'default_timezone' => 'Asia/Shanghai',
+    // 前后端分离部署地址
+    'backend_url'       => env('BACKEND_URL', 'http://localhost:8000'),
+    'frontend_url'      => env('FRONTEND_URL', 'http://localhost:5173'),
 
     // 应用映射（自动多应用模式有效）
     'app_map'          => [],

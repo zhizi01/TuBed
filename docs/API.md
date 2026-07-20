@@ -6,6 +6,7 @@
 - 请求和响应编码：UTF-8
 - JSON 请求需发送 `Content-Type: application/json`
 - 上传接口使用 `multipart/form-data`
+- 前端来源必须包含在后端 `.env` 的 `CORS_ALLOW_ORIGINS` 中
 - 除注册、登录和健康检查外，均需发送：
 
 ```http
@@ -23,6 +24,9 @@ Authorization: Bearer <access_token>
 ```
 
 `code` 与 HTTP 状态码一致。常见错误包括 400 参数错误、401 未登录、403 账号禁用、404 资源不存在、409 数据冲突、413 文件或配额超限、415 格式不支持、422 图片内容无效、500 服务异常。
+
+前后端分离部署时，后端使用 `BACKEND_URL` 生成图片地址，使用
+`FRONTEND_URL` 和 `CORS_ALLOW_ORIGINS` 校验浏览器来源。多个允许来源以英文逗号分隔。
 
 ## 公共接口
 

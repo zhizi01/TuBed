@@ -36,6 +36,9 @@ foreach ([
 expectInstall(str_contains($installer, 'install.lock'), '安装脚本必须创建安装锁');
 expectInstall(str_contains($installer, 'password_hash'), '超级管理员密码必须安全哈希');
 expectInstall(str_contains($installer, "'.env'"), '安装脚本必须生成 .env');
+expectInstall(str_contains($installer, 'BACKEND_URL'), '安装脚本必须写入后端服务地址');
+expectInstall(str_contains($installer, 'FRONTEND_URL'), '安装脚本必须写入前端访问地址');
+expectInstall(str_contains($installer, 'CORS_ALLOW_ORIGINS'), '安装脚本必须写入 CORS 白名单');
 expectInstall(str_contains($installer, 'hash_equals'), '安装表单必须验证 CSRF 令牌');
 expectInstall(
     str_contains((string) $gitignore, '/public/install/install.lock'),

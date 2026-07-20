@@ -1,5 +1,7 @@
 <?php
 
+$backendUrl = rtrim((string) env('BACKEND_URL', ''), '/');
+
 return [
     // 默认磁盘
     'default' => 'local',
@@ -15,7 +17,10 @@ return [
             // 磁盘路径
             'root'       => app()->getRootPath() . 'public/storage',
             // 磁盘路径对应的外部URL路径
-            'url'        => env('PUBLIC_STORAGE_URL', '/storage'),
+            'url'        => env(
+                'PUBLIC_STORAGE_URL',
+                $backendUrl !== '' ? $backendUrl . '/storage' : '/storage'
+            ),
             // 可见性
             'visibility' => 'public',
         ],

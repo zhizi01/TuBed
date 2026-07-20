@@ -11,7 +11,9 @@ const secretVisible = ref(false)
 const secret = ref('')
 const list = ref([])
 const form = reactive({ name: '', expires_in_days: 365 })
-const openEndpoint = computed(() => `${location.origin}/api/open/v1/images`)
+const openApiBase = (import.meta.env.VITE_OPEN_API_BASE_URL || `${location.origin}/api/open/v1`)
+  .replace(/\/$/, '')
+const openEndpoint = computed(() => `${openApiBase}/images`)
 
 async function loadKeys() {
   loading.value = true

@@ -24,7 +24,7 @@ php think run
 ```
 
 3. 浏览器访问 `http://localhost:8000/install/install.php`，填写 MySQL 8
-   连接信息、站点地址和超级管理员账号密码。
+   连接信息、后端服务地址、前端访问地址和超级管理员账号密码。
 
 安装程序会统一执行 `public/install/init.sql`、写入根目录 `.env`，并在成功后创建
 `public/install/install.lock`。检测到锁文件后安装程序会拒绝重复安装。
@@ -42,6 +42,19 @@ GET http://localhost:8000/api/v1/health
 ```bash
 cd app-dist
 npm install
+```
+
+前端直连独立后端时，先将 `app-dist/.env.example` 复制为
+`app-dist/.env.local`，再按部署地址修改：
+
+```dotenv
+VITE_API_BASE_URL=https://api.example.com/api/v1
+VITE_OPEN_API_BASE_URL=https://api.example.com/api/open/v1
+```
+
+不创建 `.env.local` 时，开发环境会继续使用 Vite 内置的 `/api` 代理。启动：
+
+```bash
 npm run dev
 ```
 
@@ -65,6 +78,14 @@ npm run dev
 - 前端通过路由、菜单和 `v-permission` 指令做三层权限展示，后端中间件再次强制校验
 - 开放上传地址为 `POST /api/open/v1/images`，使用 `X-API-Key` 请求头
 - 每个 API 密钥独立限制窗口访问频率、总调用次数、状态和过期时间
+
+## 前后端分离与 CORS
+
+- `BACKEND_URL`：后端服务外部地址，用于生成图片公开地址
+- `FRONTEND_URL`：主前端地址，安装成功后跳转到该地址
+- `CORS_ALLOW_ORIGINS`：允许跨域访问后端的前端来源
+- 多个前端来源使用英文逗号分隔，必须包含协议和端口且不能包含页面路径
+- 开放 API 的限流响应头已加入 CORS 暴露列表
 
 ## 验证
 

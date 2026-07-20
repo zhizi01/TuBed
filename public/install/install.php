@@ -32,7 +32,11 @@ if (empty($_SESSION['install_csrf'])) {
 }
 
 $hostHeader = preg_replace('/[^A-Za-z0-9.:\-\[\]]/', '', (string) ($_SERVER['HTTP_HOST'] ?? 'localhost'));
-$defaultSiteUrl = ($https ? 'https' : 'http') . '://' . ($hostHeader ?: 'localhost');
+$defaultBackendUrl = ($https ? 'https' : 'http') . '://' . ($hostHeader ?: 'localhost');
+$defaultHost = (string) parse_url($defaultBackendUrl, PHP_URL_HOST);
+$defaultFrontendUrl = in_array($defaultHost, ['127.0.0.1', 'localhost'], true)
+    ? ($https ? 'https' : 'http') . '://' . $defaultHost . ':5173'
+    : $defaultBackendUrl;
 $values = [
     'db_host' => trim((string) ($_POST['db_host'] ?? '127.0.0.1')),
     'db_port' => trim((string) ($_POST['db_port'] ?? '3306')),
@@ -40,7 +44,8 @@ $values = [
     'db_user' => trim((string) ($_POST['db_user'] ?? 'root')),
     'admin_username' => trim((string) ($_POST['admin_username'] ?? 'admin')),
     'admin_email' => strtolower(trim((string) ($_POST['admin_email'] ?? ''))),
-    'site_url' => rtrim(trim((string) ($_POST['site_url'] ?? $defaultSiteUrl)), '/'),
+    'backend_url' => rtrim(trim((string) ($_POST['backend_url'] ?? $defaultBackendUrl)), '/'),
+    'frontend_url' => rtrim(trim((string) ($_POST['frontend_url'] ?? $defaultFrontendUrl)), '/'),
 ];
 
 function escapeHtml(string $value): string
@@ -90,8 +95,10 @@ function buildEnvContent(array $config): string
         'AUTH_ALLOW_REGISTER = true',
         'AUTH_FIRST_USER_ADMIN = false',
         'AUTH_TOKEN_TTL_DAYS = 30',
-        'CORS_ALLOW_ORIGIN = ' . quoteEnv($config['site_url']),
-        'PUBLIC_STORAGE_URL = ' . quoteEnv($config['site_url'] . '/storage'),
+        'BACKEND_URL = ' . quoteEnv($config['backend_url']),
+        'FRONTEND_URL = ' . quoteEnv($config['frontend_url']),
+        'CORS_ALLOW_ORIGINS = ' . quoteEnv($config['frontend_url']),
+        'PUBLIC_STORAGE_URL = ' . quoteEnv($config['backend_url'] . '/storage'),
         'UPLOAD_MAX_SIZE = 20971520',
         'UPLOAD_MAX_PIXELS = 100000000',
         '',
@@ -143,7 +150,8 @@ if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $adminEmail = $values['admin_email'];
         $adminPassword = (string) ($_POST['admin_password'] ?? '');
         $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
-        $siteUrl = $values['site_url'];
+        $backendUrl = $values['backend_url'];
+        $frontendUrl = $values['frontend_url'];
 
         if ($dbHost === '' || !preg_match('/^[A-Za-z0-9_.:\-\[\]]+$/', $dbHost)) {
             throw new RuntimeException('MySQL 主机地址格式不正确');
@@ -171,9 +179,20 @@ if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!hash_equals($adminPassword, $confirmPassword)) {
             throw new RuntimeException('两次输入的管理员密码不一致');
         }
-        if (!filter_var($siteUrl, FILTER_VALIDATE_URL)
-            || !in_array((string) parse_url($siteUrl, PHP_URL_SCHEME), ['http', 'https'], true)) {
-            throw new RuntimeException('站点地址必须是有效的 HTTP 或 HTTPS 地址');
+        foreach ([
+            '后端服务地址' => $backendUrl,
+            '前端访问地址' => $frontendUrl,
+        ] as $label => $url) {
+            if (!filter_var($url, FILTER_VALIDATE_URL)
+                || !in_array((string) parse_url($url, PHP_URL_SCHEME), ['http', 'https'], true)
+                || parse_url($url, PHP_URL_QUERY) !== null
+                || parse_url($url, PHP_URL_FRAGMENT) !== null) {
+                throw new RuntimeException("{$label}必须是有效且不带参数的 HTTP 或 HTTPS 地址");
+            }
+        }
+        $frontendPath = (string) parse_url($frontendUrl, PHP_URL_PATH);
+        if ($frontendPath !== '' && $frontendPath !== '/') {
+            throw new RuntimeException('前端访问地址必须填写来源域名，不能包含页面路径');
         }
 
         $pdoOptions = [
@@ -253,7 +272,8 @@ if (!$locked && $_SERVER['REQUEST_METHOD'] === 'POST') {
             'db_user' => $dbUser,
             'db_password' => $dbPassword,
             'db_port' => (string) $dbPort,
-            'site_url' => $siteUrl,
+            'backend_url' => $backendUrl,
+            'frontend_url' => $frontendUrl,
         ]);
         if (file_put_contents($envFile, $envContent, LOCK_EX) === false) {
             throw new RuntimeException('写入 .env 配置文件失败');
@@ -503,7 +523,7 @@ if ($locked && !$success) {
                 <span class="result-mark">✓</span>
                 <h2>TuBed 安装成功</h2>
                 <p>数据库、超级管理员和 <code>.env</code> 已初始化，并已创建 <code>install.lock</code> 防止重复安装。</p>
-                <a class="button" href="<?= escapeHtml($values['site_url']) ?>/login">进入登录页</a>
+                <a class="button" href="<?= escapeHtml($values['frontend_url']) ?>/login">进入登录页</a>
             </section>
         <?php elseif ($locked): ?>
             <section class="result locked">
@@ -579,9 +599,13 @@ if ($locked && !$success) {
                             <label for="confirm_password">确认密码</label>
                             <input id="confirm_password" name="confirm_password" type="password" required autocomplete="new-password" placeholder="再次输入管理员密码">
                         </div>
-                        <div class="field full">
-                            <label for="site_url">站点地址</label>
-                            <input id="site_url" name="site_url" type="url" required value="<?= escapeHtml($values['site_url']) ?>" placeholder="https://img.example.com">
+                        <div class="field">
+                            <label for="backend_url">后端服务地址</label>
+                            <input id="backend_url" name="backend_url" type="url" required value="<?= escapeHtml($values['backend_url']) ?>" placeholder="https://api.example.com">
+                        </div>
+                        <div class="field">
+                            <label for="frontend_url">前端访问地址</label>
+                            <input id="frontend_url" name="frontend_url" type="url" required value="<?= escapeHtml($values['frontend_url']) ?>" placeholder="https://img.example.com">
                         </div>
                     </div>
                 </fieldset>
