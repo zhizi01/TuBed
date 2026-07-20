@@ -68,11 +68,15 @@ class AuthController
 
         try {
             [$user, $issued] = Db::transaction(function () use ($username, $email, $password) {
+                $role = config('auth.first_user_admin', true)
+                    && UserDbModel::count() === 0
+                    ? 'admin'
+                    : 'user';
                 $user = UserDbModel::create([
                     'username' => $username,
                     'email' => $email ?: null,
                     'password_hash' => password_hash($password, PASSWORD_DEFAULT),
-                    'role' => 'user',
+                    'role' => $role,
                     'status' => 1,
                 ]);
                 $issued = UserTokenDbModel::issue(
@@ -170,19 +174,11 @@ class AuthController
     public function me(Request $request)
     {
         $user = $request->user;
-        $data = $user->toArray();
-        $data['storage_remaining'] = max(
-            0,
-            (int) $user->storage_quota - (int) $user->storage_used
-        );
-        $data['storage_percent'] = (int) $user->storage_quota > 0
-            ? round((int) $user->storage_used * 100 / (int) $user->storage_quota, 2)
-            : 0;
 
         return json([
             'code' => 200,
             'message' => 'success',
-            'data' => $data,
+            'data' => $this->buildUserData($user),
         ]);
     }
 
@@ -203,7 +199,23 @@ class AuthController
             'token_type' => 'Bearer',
             'access_token' => $issued['token'],
             'expires_at' => (string) $issued['model']->getData('expires_at'),
-            'user' => $user->toArray(),
+            'user' => $this->buildUserData($user),
         ];
+    }
+
+    private function buildUserData(UserDbModel $user): array
+    {
+        $data = $user->toArray();
+        $data['role_label'] = $user->getRoleLabel();
+        $data['permissions'] = $user->getPermissions();
+        $data['storage_remaining'] = max(
+            0,
+            (int) $user->storage_quota - (int) $user->storage_used
+        );
+        $data['storage_percent'] = (int) $user->storage_quota > 0
+            ? round((int) $user->storage_used * 100 / (int) $user->storage_quota, 2)
+            : 0;
+
+        return $data;
     }
 }

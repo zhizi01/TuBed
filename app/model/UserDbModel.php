@@ -45,6 +45,27 @@ class UserDbModel extends Model
             && (int) $this->storage_used + $bytes <= (int) $this->storage_quota;
     }
 
+    public function getPermissions(): array
+    {
+        return (array) config('permission.roles.' . $this->role . '.permissions', []);
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        $permissions = $this->getPermissions();
+
+        return in_array('*', $permissions, true)
+            || in_array($permission, $permissions, true);
+    }
+
+    public function getRoleLabel(): string
+    {
+        return (string) config(
+            'permission.roles.' . $this->role . '.label',
+            (string) $this->role
+        );
+    }
+
     public function tokens()
     {
         return $this->hasMany(UserTokenDbModel::class, 'user_id', 'id');
@@ -58,5 +79,10 @@ class UserDbModel extends Model
     public function images()
     {
         return $this->hasMany(ImageDbModel::class, 'user_id', 'id');
+    }
+
+    public function apiKeys()
+    {
+        return $this->hasMany(ApiKeyDbModel::class, 'user_id', 'id');
     }
 }
