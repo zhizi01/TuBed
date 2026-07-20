@@ -81,8 +81,8 @@ async function submit() {
       <div class="first-admin-note">
         <UserPlus :size="19" />
         <div>
-          <strong>首次部署提示</strong>
-          <span>系统首个注册账号默认成为管理员。</span>
+          <strong>账号权限提示</strong>
+          <span>超级管理员由安装程序初始化，新注册账号默认为普通用户。</span>
         </div>
       </div>
     </section>

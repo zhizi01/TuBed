@@ -13,3 +13,4 @@ __pycache__/
 /.project
 /public/storage/*
 !/public/storage/.gitignore
+/public/install/install.lock

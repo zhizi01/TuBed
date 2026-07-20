@@ -17,24 +17,21 @@ TuBed 是一个基于 ThinkPHP 8、MySQL 8 和 Vue 3 的图床项目。当前后
 composer install
 ```
 
-2. 创建本地配置：
-
-```powershell
-Copy-Item .example.env .env
-```
-
-Linux 或 macOS 可执行 `cp .example.env .env`。随后按实际环境修改数据库账号、跨域来源和存储访问地址。
-
-3. 新部署执行 `database/schema.sql`；已部署旧版数据库执行
-   `database/migrations/20260720_add_rbac_open_api.sql`。
-
-4. 启动后端：
+2. 启动后端：
 
 ```bash
 php think run
 ```
 
-后端默认地址为 `http://localhost:8000`，健康检查接口为：
+3. 浏览器访问 `http://localhost:8000/install/install.php`，填写 MySQL 8
+   连接信息、站点地址和超级管理员账号密码。
+
+安装程序会统一执行 `public/install/init.sql`、写入根目录 `.env`，并在成功后创建
+`public/install/install.lock`。检测到锁文件后安装程序会拒绝重复安装。
+Apache 和本地开发路由已禁止直接下载 `.sql`、`.lock`；使用 Nginx 时也应拒绝访问
+这两类文件，并建议安装完成后禁用整个 `/install` 路径。
+
+4. 健康检查：
 
 ```text
 GET http://localhost:8000/api/v1/health
@@ -54,14 +51,15 @@ npm run dev
 - `app/model`：MySQL 数据模型及少量领域逻辑
 - `app/middleware`：Bearer Token 认证和跨域中间件
 - `config/upload.php`：上传大小、像素和格式白名单
-- `database/schema.sql`：MySQL 8 初始化结构
+- `public/install/install.php`：Web 安装程序
+- `public/install/init.sql`：唯一的 MySQL 8 初始化结构
 - `docs/API.md`：前端对接文档
 - `design-system/tubed/MASTER.md`：后台 UI 与交互规范
 - `public/storage`：本地公开图片存储目录，实际图片不会进入 Git
 
 ## 角色与开放 API
 
-- 首个注册账号默认成为管理员，可通过 `AUTH_FIRST_USER_ADMIN` 关闭
+- 安装程序创建首个超级管理员，后续注册账号默认为普通用户
 - 管理员可管理用户角色、账号状态、存储配额、全站图片和 API 策略
 - 普通用户只能管理自己的图片、相册、个人信息和 API 密钥
 - 前端通过路由、菜单和 `v-permission` 指令做三层权限展示，后端中间件再次强制校验
@@ -74,7 +72,7 @@ npm run dev
 composer test
 ```
 
-该命令会执行不依赖数据库的模型冒烟测试，并验证所有 ThinkPHP 路由均可成功加载。完整接口联调前需先配置 MySQL 并执行初始化脚本。
+该命令会执行模型冒烟测试、安装脚本语法检查，并验证所有 ThinkPHP 路由均可成功加载。
 
 ## 上传安全
 

@@ -47,6 +47,8 @@
         ],
         "test": [
             "@php tests/unit.php",
+            "@php -l public/install/install.php",
+            "@php tests/install.php",
             "@php think route:list"
         ]
     }

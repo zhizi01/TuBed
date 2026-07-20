@@ -10,6 +10,12 @@
 // +----------------------------------------------------------------------
 // $Id$
 
+$requestPath = (string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+if (preg_match('#^/install/.*\.(?:sql|lock)$#i', $requestPath)) {
+    http_response_code(404);
+    exit;
+}
+
 if (is_file($_SERVER["DOCUMENT_ROOT"] . $_SERVER["SCRIPT_NAME"])) {
     return false;
 } else {

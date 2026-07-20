@@ -68,7 +68,7 @@ class AuthController
 
         try {
             [$user, $issued] = Db::transaction(function () use ($username, $email, $password) {
-                $role = config('auth.first_user_admin', true)
+                $role = config('auth.first_user_admin', false)
                     && UserDbModel::count() === 0
                     ? 'admin'
                     : 'user';

@@ -1,11 +1,8 @@
--- TuBed 图床系统 MySQL 8 初始化脚本
--- 生产环境建议先创建专用数据库账号，再以该账号执行建表语句。
+-- TuBed 图床系统 MySQL 8 统一初始化脚本
+-- 数据库创建与超级管理员初始化由 install.php 负责。
 
-CREATE DATABASE IF NOT EXISTS `tubed`
-    DEFAULT CHARACTER SET utf8mb4
-    DEFAULT COLLATE utf8mb4_0900_ai_ci;
-
-USE `tubed`;
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
 CREATE TABLE IF NOT EXISTS `users` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '用户ID',
@@ -141,3 +138,5 @@ VALUES
     ('open_api_default_rate_window', '60', 'integer', '新密钥默认限流窗口秒数'),
     ('open_api_default_total_limit', '10000', 'integer', '新密钥默认总调用额度'),
     ('open_api_max_keys_per_user', '5', 'integer', '每个用户最多创建的API密钥数');
+
+SET FOREIGN_KEY_CHECKS = 1;
