@@ -1,77 +1,76 @@
-![](https://www.thinkphp.cn/uploads/images/20230630/300c856765af4d8ae758c503185f8739.png)
+# TuBed 图床系统
 
-ThinkPHP 8
-===============
+TuBed 是一个基于 ThinkPHP 8、MySQL 8 和 Vue 3 的图床项目。当前后端已提供用户认证、相册管理、图片上传与管理、存储配额和用量统计接口，前端脚手架位于 `app-dist`。
 
-## 特性
+## 环境要求
 
-* 基于PHP`8.0+`重构
-* 升级`PSR`依赖
-* 依赖`think-orm`3.0+版本
-* 全新的`think-dumper`服务，支持远程调试
-* 支持`6.0`/`6.1`无缝升级
+- PHP 8.0+，启用 `pdo_mysql`、`fileinfo`、`mbstring`
+- MySQL 8.0+
+- Composer 2
+- Node.js 20.19+（仅前端开发需要）
 
-> ThinkPHP8的运行环境要求PHP8.0+
+## 本地启动
 
-现在开始，你可以使用官方提供的[ThinkChat](https://chat.topthink.com/)，让你在学习ThinkPHP的旅途中享受私人AI助理服务！
+1. 安装后端依赖：
 
-![](https://www.topthink.com/uploads/assistant/20230630/4d1a3f0ad2958b49bb8189b7ef824cb0.png)
+```bash
+composer install
+```
 
-ThinkPHP生态服务由[顶想云](https://www.topthink.com)（TOPThink Cloud）提供，为生态提供专业的开发者服务和价值之选。
+2. 创建本地配置：
 
-## 文档
+```powershell
+Copy-Item .example.env .env
+```
 
-[完全开发手册](https://doc.thinkphp.cn)
+Linux 或 macOS 可执行 `cp .example.env .env`。随后按实际环境修改数据库账号、跨域来源和存储访问地址。
 
+3. 执行 `database/schema.sql`，创建 `tubed` 数据库及四张业务表。
 
-## 赞助
+4. 启动后端：
 
-全新的[赞助计划](https://www.thinkphp.cn/sponsor)可以让你通过我们的网站、手册、欢迎页及GIT仓库获得巨大曝光，同时提升企业的品牌声誉，也更好保障ThinkPHP的可持续发展。
-
-[![](https://www.thinkphp.cn/sponsor/special.svg)](https://www.thinkphp.cn/sponsor/special)
-
-[![](https://www.thinkphp.cn/sponsor.svg)](https://www.thinkphp.cn/sponsor)
-
-## 安装
-
-~~~
-composer create-project topthink/think tp
-~~~
-
-启动服务
-
-~~~
-cd tp
+```bash
 php think run
-~~~
+```
 
-然后就可以在浏览器中访问
+后端默认地址为 `http://localhost:8000`，健康检查接口为：
 
-~~~
-http://localhost:8000
-~~~
+```text
+GET http://localhost:8000/api/v1/health
+```
 
-如果需要更新框架使用
-~~~
-composer update topthink/framework
-~~~
+5. 启动前端：
 
-## 命名规范
+```bash
+cd app-dist
+npm install
+npm run dev
+```
 
-`ThinkPHP`遵循PSR-2命名规范和PSR-4自动加载规范。
+## 核心目录
 
-## 参与开发
+- `app/controller`：认证、相册、图片和统计控制器
+- `app/model`：MySQL 数据模型及少量领域逻辑
+- `app/middleware`：Bearer Token 认证和跨域中间件
+- `config/upload.php`：上传大小、像素和格式白名单
+- `database/schema.sql`：MySQL 8 初始化结构
+- `docs/API.md`：前端对接文档
+- `public/storage`：本地公开图片存储目录，实际图片不会进入 Git
 
-直接提交PR或者Issue即可
+## 验证
 
-## 版权信息
+```bash
+composer test
+```
 
-ThinkPHP遵循Apache2开源协议发布，并提供免费使用。
+该命令会执行不依赖数据库的模型冒烟测试，并验证所有 ThinkPHP 路由均可成功加载。完整接口联调前需先配置 MySQL 并执行初始化脚本。
 
-本项目包含的第三方源码和二进制文件之版权信息另行标注。
+## 上传安全
 
-版权所有Copyright © 2006-2024 by ThinkPHP (http://thinkphp.cn) All rights reserved。
+- 仅允许 JPG、PNG、GIF、WebP、AVIF，不接受可执行 SVG
+- MIME 类型与真实图片内容会被双重校验
+- 默认单文件上限 20 MB、总像素上限 1 亿
+- 文件使用随机公开标识命名，不使用用户提交的路径
+- 原始访问令牌只返回一次，数据库仅保存 SHA-256 摘要
 
-ThinkPHP® 商标和著作权所有者为上海顶想信息科技有限公司。
-
-更多细节参阅 [LICENSE.txt](LICENSE.txt)
+详细请求参数和响应结构见 [API 文档](docs/API.md)。
