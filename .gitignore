@@ -1,12 +1,15 @@
 *.log
 .env
 composer.phar
-composer.lock
 .DS_Store
 Thumbs.db
+__pycache__/
+*.py[cod]
 /.idea
 /.vscode
 /vendor
 /.settings
 /.buildpath
 /.project
+/public/storage/*
+!/public/storage/.gitignore
