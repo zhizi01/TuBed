@@ -121,7 +121,7 @@ onMounted(loadKeys)
         <p>为外部程序创建独立密钥。每个密钥具有访问频率、总调用次数和过期时间限制。</p>
       </div>
       <div class="manage-actions">
-        <el-button type="primary" @click="openCreate"><Plus :size="15" />创建密钥</el-button>
+        <el-button v-permission="'api_keys.manage'" type="primary" @click="openCreate"><Plus :size="15" />创建密钥</el-button>
       </div>
     </header>
 

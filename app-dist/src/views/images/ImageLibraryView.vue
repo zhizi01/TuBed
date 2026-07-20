@@ -213,7 +213,7 @@ onBeforeUnmount(clearFile)
         <p>上传、筛选和整理图片，复制可直接访问的公开地址。</p>
       </div>
       <div class="manage-actions">
-        <el-button type="primary" @click="openUpload"><Plus :size="15" />上传图片</el-button>
+        <el-button v-permission="'images.manage'" type="primary" @click="openUpload"><Plus :size="15" />上传图片</el-button>
       </div>
     </header>
 

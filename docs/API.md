@@ -70,7 +70,8 @@ Authorization: Bearer <access_token>
 
 `GET /api/v1/auth/me`
 
-除用户资料外，还会返回 `storage_remaining` 和 `storage_percent`。
+除用户资料外，还会返回 `role`、`role_label`、`permissions`、
+`storage_remaining` 和 `storage_percent`。管理员的权限数组包含 `*`。
 
 ### 退出登录
 
@@ -190,6 +191,53 @@ Authorization: Bearer <access_token>
 `DELETE /api/v1/images/{id}`
 
 删除元数据并扣减已用空间，同时清理本地存储文件。
+
+## API 密钥接口
+
+以下接口使用用户 Bearer Token。
+
+- `GET /api/v1/api-keys`：当前用户的密钥列表
+- `POST /api/v1/api-keys`：创建密钥；参数为 `name`、`expires_in_days`
+- `PATCH /api/v1/api-keys/{id}`：修改名称或启用状态
+- `POST /api/v1/api-keys/{id}/regenerate`：重置原始密钥
+- `DELETE /api/v1/api-keys/{id}`：删除密钥
+
+完整密钥只在创建或重置响应的 `data.secret` 中出现一次。
+
+## 开放上传接口
+
+`POST /api/open/v1/images`
+
+该接口不使用用户 Bearer Token，请发送：
+
+```http
+X-API-Key: tb_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Content-Type: multipart/form-data
+```
+
+表单字段与登录后的图片上传接口相同。每次访问都会计入密钥的窗口请求数和累计调用次数。响应头包含：
+
+- `X-RateLimit-Limit`
+- `X-RateLimit-Remaining`
+- `X-RateLimit-Window`
+- `X-Usage-Limit`
+- `X-Usage-Remaining`
+- 超出频率时额外返回 `Retry-After`
+
+可通过 `GET /api/open/v1/ping` 验证密钥，验证请求同样计入额度。
+
+## 管理员接口
+
+以下接口同时经过 Bearer Token 认证和管理员权限中间件：
+
+- `GET /api/v1/admin/overview`：全站概览
+- `GET /api/v1/admin/users`：用户列表
+- `PATCH /api/v1/admin/users/{id}`：角色、状态、存储配额
+- `GET /api/v1/admin/images`：全站图片列表
+- `DELETE /api/v1/admin/images/{id}`：删除图片
+- `GET|PUT /api/v1/admin/api-settings`：开放 API 全局策略
+- `GET /api/v1/admin/api-keys`：全站密钥列表
+- `PATCH /api/v1/admin/api-keys/{id}`：单独调整密钥限流和额度
 
 ## Axios 接入示例
 

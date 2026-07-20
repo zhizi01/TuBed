@@ -84,7 +84,7 @@ onMounted(loadAlbums)
         <p>按照项目或用途归档图片；删除相册不会删除其中图片。</p>
       </div>
       <div class="manage-actions">
-        <el-button type="primary" @click="openCreate"><Plus :size="15" />新建相册</el-button>
+        <el-button v-permission="'albums.manage'" type="primary" @click="openCreate"><Plus :size="15" />新建相册</el-button>
       </div>
     </header>
 
