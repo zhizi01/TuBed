@@ -9,6 +9,8 @@ TuBed 是一个基于 ThinkPHP 8、MySQL 8 和 Vue 3 的图床项目。当前后
 - Composer 2
 - Node.js 20.19+（仅前端开发需要）
 
+*青山补充：该项目未修复Thinkphp8的Db自增问题，可查阅https://gitee.com/liu21st/think-orm/issues/ID8XFZ进行自行修复*
+
 ## 本地启动
 
 1. 安装后端依赖：
