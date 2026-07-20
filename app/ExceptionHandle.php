@@ -65,10 +65,10 @@ class ExceptionHandle extends Handle
                 $data = $e->getError();
             } elseif ($e instanceof HttpException) {
                 $status = $e->getStatusCode();
-                $message = $e->getMessage() ?: match ($status) {
+                $message = match ($status) {
                     404 => '接口不存在',
                     405 => '请求方法不允许',
-                    default => '请求失败',
+                    default => $e->getMessage() ?: '请求失败',
                 };
             }
 
