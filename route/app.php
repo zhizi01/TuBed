@@ -8,10 +8,16 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+use app\middleware\AuthMiddleware;
 use think\facade\Route;
 
-Route::get('think', function () {
-    return 'hello,ThinkPHP8!';
+Route::group('api/v1', function () {
+    Route::get('health', 'HealthController/index');
+    Route::post('auth/register', 'AuthController/register');
+    Route::post('auth/login', 'AuthController/login');
 });
 
-Route::get('hello/:name', 'index/hello');
+Route::group('api/v1', function () {
+    Route::get('auth/me', 'AuthController/me');
+    Route::post('auth/logout', 'AuthController/logout');
+})->middleware(AuthMiddleware::class);
