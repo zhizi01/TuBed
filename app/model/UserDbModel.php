@@ -12,12 +12,17 @@ class UserDbModel extends Model
     protected $createTime = 'created_at';
     protected $updateTime = 'updated_at';
     protected $hidden = ['password_hash'];
-    protected $type = [
+    protected $schema = [
         'id' => 'integer',
+        'username' => 'string',
+        'email' => 'string',
+        'password_hash' => 'string',
+        'role' => 'string',
         'status' => 'integer',
         'storage_quota' => 'integer',
         'storage_used' => 'integer',
         'last_login_at' => 'datetime',
+        'last_login_ip' => 'string',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

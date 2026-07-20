@@ -10,9 +10,11 @@ class UserTokenDbModel extends Model
     protected $pk = 'id';
     protected $autoWriteTimestamp = false;
     protected $hidden = ['token_hash'];
-    protected $type = [
+    protected $schema = [
         'id' => 'integer',
         'user_id' => 'integer',
+        'name' => 'string',
+        'token_hash' => 'string',
         'last_used_at' => 'datetime',
         'expires_at' => 'datetime',
         'created_at' => 'datetime',

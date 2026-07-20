@@ -11,9 +11,11 @@ class AlbumDbModel extends Model
     protected $autoWriteTimestamp = true;
     protected $createTime = 'created_at';
     protected $updateTime = 'updated_at';
-    protected $type = [
+    protected $schema = [
         'id' => 'integer',
         'user_id' => 'integer',
+        'name' => 'string',
+        'description' => 'string',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
