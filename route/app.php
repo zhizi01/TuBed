@@ -20,4 +20,17 @@ Route::group('api/v1', function () {
 Route::group('api/v1', function () {
     Route::get('auth/me', 'AuthController/me');
     Route::post('auth/logout', 'AuthController/logout');
+
+    Route::get('stats/overview', 'StatsController/overview');
+
+    Route::get('albums', 'AlbumController/index');
+    Route::post('albums', 'AlbumController/create');
+    Route::rule('albums/:id', 'AlbumController/update', 'PUT|PATCH');
+    Route::delete('albums/:id', 'AlbumController/delete');
+
+    Route::get('images', 'ImageController/index');
+    Route::post('images', 'ImageController/upload');
+    Route::get('images/:id', 'ImageController/show');
+    Route::rule('images/:id', 'ImageController/update', 'PUT|PATCH');
+    Route::delete('images/:id', 'ImageController/delete');
 })->middleware(AuthMiddleware::class);

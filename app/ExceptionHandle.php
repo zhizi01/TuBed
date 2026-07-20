@@ -50,9 +50,35 @@ class ExceptionHandle extends Handle
      */
     public function render($request, Throwable $e): Response
     {
-        // 添加自定义异常处理机制
+        if ($e instanceof HttpResponseException) {
+            return parent::render($request, $e);
+        }
 
-        // 其他错误交给系统处理
+        if (str_starts_with(trim($request->pathinfo(), '/'), 'api/')) {
+            $status = 500;
+            $message = '服务器内部错误';
+            $data = null;
+
+            if ($e instanceof ValidateException) {
+                $status = 422;
+                $message = '参数验证失败';
+                $data = $e->getError();
+            } elseif ($e instanceof HttpException) {
+                $status = $e->getStatusCode();
+                $message = $e->getMessage() ?: match ($status) {
+                    404 => '接口不存在',
+                    405 => '请求方法不允许',
+                    default => '请求失败',
+                };
+            }
+
+            return json([
+                'code' => $status,
+                'message' => $message,
+                'data' => $data,
+            ], $status);
+        }
+
         return parent::render($request, $e);
     }
 }
