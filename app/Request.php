@@ -1,6 +1,7 @@
 <?php
 namespace app;
 
+use app\model\ApiKeyDbModel;
 use app\model\UserDbModel;
 use app\model\UserTokenDbModel;
 
@@ -10,4 +11,6 @@ class Request extends \think\Request
     // 由认证中间件注入，控制器无需重复查询当前用户。
     public ?UserDbModel $user = null;
     public ?UserTokenDbModel $accessToken = null;
+    public ?ApiKeyDbModel $apiKey = null;
+    public string $authType = 'guest';
 }

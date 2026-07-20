@@ -8,7 +8,9 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+use app\middleware\AdminMiddleware;
 use app\middleware\AuthMiddleware;
+use app\middleware\OpenApiMiddleware;
 use think\facade\Route;
 
 Route::group('api/v1', function () {
@@ -33,4 +35,38 @@ Route::group('api/v1', function () {
     Route::get('images/:id', 'ImageController/show');
     Route::rule('images/:id', 'ImageController/update', 'PUT|PATCH');
     Route::delete('images/:id', 'ImageController/delete');
+
+    Route::get('api-keys', 'ApiKeyController/index');
+    Route::post('api-keys', 'ApiKeyController/create');
+    Route::patch('api-keys/:id', 'ApiKeyController/update');
+    Route::post('api-keys/:id/regenerate', 'ApiKeyController/regenerate');
+    Route::delete('api-keys/:id', 'ApiKeyController/delete');
 })->middleware(AuthMiddleware::class);
+
+Route::group('api/v1/admin', function () {
+    Route::get('overview', 'AdminController/overview');
+    Route::get('users', 'AdminController/users');
+    Route::patch('users/:id', 'AdminController/updateUser');
+    Route::get('images', 'AdminController/images');
+    Route::delete('images/:id', 'AdminController/deleteImage');
+    Route::get('api-settings', 'AdminController/apiSettings');
+    Route::put('api-settings', 'AdminController/updateApiSettings');
+    Route::get('api-keys', 'AdminController/apiKeys');
+    Route::patch('api-keys/:id', 'AdminController/updateApiKey');
+})->middleware([AuthMiddleware::class, AdminMiddleware::class]);
+
+Route::group('api/open/v1', function () {
+    Route::get('ping', function () {
+        $request = request();
+
+        return json([
+            'code' => 200,
+            'message' => 'success',
+            'data' => [
+                'key_prefix' => $request->apiKey->key_prefix,
+                'user_id' => $request->user->id,
+            ],
+        ]);
+    });
+    Route::post('images', 'ImageController/upload');
+})->middleware(OpenApiMiddleware::class);

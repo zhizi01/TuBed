@@ -39,6 +39,7 @@ class AuthMiddleware
 
         $request->user = $user;
         $request->accessToken = $accessToken;
+        $request->authType = 'token';
 
         // 降低写库频率，每五分钟刷新一次令牌使用时间。
         $lastUsedAt = $accessToken->getData('last_used_at');
