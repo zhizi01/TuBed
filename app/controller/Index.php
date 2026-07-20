@@ -2,17 +2,19 @@
 
 namespace app\controller;
 
-use app\BaseController;
-
-class Index extends BaseController
+class Index
 {
     public function index()
     {
-        return '<style>*{ padding: 0; margin: 0; }</style><iframe src="https://www.thinkphp.cn/welcome?version=' . \think\facade\App::version() . '" width="100%" height="100%" frameborder="0" scrolling="auto"></iframe>';
-    }
+        $lockFile = app()->getRootPath()
+            . 'public' . DIRECTORY_SEPARATOR
+            . 'install' . DIRECTORY_SEPARATOR
+            . 'install.lock';
 
-    public function hello($name = 'ThinkPHP8')
-    {
-        return 'hello,' . $name;
+        if (!is_file($lockFile)) {
+            return redirect('/install/install.php');
+        }
+
+        return response('', 404);
     }
 }

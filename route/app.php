@@ -13,6 +13,8 @@ use app\middleware\AuthMiddleware;
 use app\middleware\OpenApiMiddleware;
 use think\facade\Route;
 
+Route::get('/', 'Index/index');
+
 Route::group('api/v1', function () {
     Route::get('health', 'HealthController/index');
     Route::post('auth/register', 'AuthController/register');
